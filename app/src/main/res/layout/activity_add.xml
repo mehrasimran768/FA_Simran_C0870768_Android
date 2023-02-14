@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:layout_marginTop="150dp"
-        android:text="Product Id"
+        android:hint="Product Id"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

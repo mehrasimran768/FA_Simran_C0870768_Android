@@ -12,10 +12,10 @@ import androidx.annotation.Nullable;
 class MyDatabaseHelper extends SQLiteOpenHelper {
 
     private Context context;
-    private static final String DATABASE_NAME = "BookLibrary.db";
+    private static final String DATABASE_NAME = "products.db";
     private static final int DATABASE_VERSION = 1;
 
-    private static final String TABLE_NAME = "my_library";
+    private static final String TABLE_NAME = "my_product";
     private static final String COLUMN_ID = "_id";
     private static final String COLUMN_PID = "pid";
     private static final String COLUMN_NAME = "product_name";
@@ -32,7 +32,7 @@ class MyDatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String query = "CREATE TABLE " + TABLE_NAME +
                 " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_PID + "INTEGER,"+
+                COLUMN_PID + " INTEGER, "+
                 COLUMN_NAME + " TEXT, " +
                 COLUMN_DESC + " TEXT, " +
                 COLUMN_PRICE + " INTEGER, " +
@@ -50,8 +50,7 @@ class MyDatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
 
-        cv.put(COLUMN_ID, id);
-        //cv.put(COLUMN_PID, pid);
+        cv.put(COLUMN_PID, Integer.parseInt(id));
         cv.put(COLUMN_NAME, name);
         cv.put(COLUMN_DESC, desc);
         cv.put(COLUMN_PRICE, price);
@@ -62,6 +61,7 @@ class MyDatabaseHelper extends SQLiteOpenHelper {
         }else {
             Toast.makeText(context, "Added Successfully!", Toast.LENGTH_SHORT).show();
         }
+        db.close();
     }
 
     Cursor readAllData(){
@@ -90,7 +90,7 @@ class MyDatabaseHelper extends SQLiteOpenHelper {
         }else {
             Toast.makeText(context, "Updated Successfully!", Toast.LENGTH_SHORT).show();
         }
-
+        db.close();
     }
 
     void deleteOneRow(String row_id){
@@ -101,11 +101,13 @@ class MyDatabaseHelper extends SQLiteOpenHelper {
         }else{
             Toast.makeText(context, "Successfully Deleted.", Toast.LENGTH_SHORT).show();
         }
+        db.close();
     }
 
     void deleteAllData(){
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("DELETE FROM " + TABLE_NAME);
+        db.close();
     }
 
 }
