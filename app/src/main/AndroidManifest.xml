@@ -12,6 +12,9 @@
         android:theme="@style/Theme.FA_Simran_C0870768_Android"
         tools:targetApi="31">
         <activity
+            android:name=".UpdateProductActivity"
+            android:exported="false" />
+        <activity
             android:name=".AddProductActivity"
             android:exported="false" />
         <activity

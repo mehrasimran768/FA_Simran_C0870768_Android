@@ -30,14 +30,9 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Headline" />
 
-            <TextView
-                android:id="@+id/textViewDesc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
 
             <TextView
-                android:id="@+id/textViewPrice"
+                android:id="@+id/textViewLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
