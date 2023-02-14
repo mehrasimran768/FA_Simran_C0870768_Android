@@ -12,10 +12,10 @@
         android:theme="@style/Theme.FA_Simran_C0870768_Android"
         tools:targetApi="31">
         <activity
-            android:name=".UpdateProductActivity"
+            android:name=".UpdateActivity"
             android:exported="false" />
         <activity
-            android:name=".AddProductActivity"
+            android:name=".AddActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

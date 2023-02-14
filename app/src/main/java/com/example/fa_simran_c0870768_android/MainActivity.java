@@ -1,111 +1,133 @@
 package com.example.fa_simran_c0870768_android;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    RecyclerView recyclerView;
+    FloatingActionButton add_button;
+    ImageView empty_imageview;
+    TextView no_data;
 
-    private ListView listViewProducts = findViewById(R.id.listViewProducts);
-    private ProductDao productDAO;
-    private List<Product> products;
-    private ArrayAdapter<Product> adapter;
-    private Button buttonAdd;
-    private SearchView searchh;
+    MyDatabaseHelper myDB;
+    ArrayList<String> product_id, product_name, product_desc, product_price, product_location;
+    CustomAdapter customAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        productDAO = new ProductDao(this);
-        products = new ArrayList<>();
-
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, products);
-        listViewProducts.setAdapter(adapter);
-
-
-        buttonAdd = findViewById(R.id.floating_button_add);
-        buttonAdd.setOnClickListener(new View.OnClickListener() {
+        recyclerView = findViewById(R.id.recyclerView);
+        add_button = findViewById(R.id.add_button);
+        empty_imageview = findViewById(R.id.empty_imageview);
+        no_data = findViewById(R.id.no_data);
+        add_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, AddProductActivity.class);
+                Intent intent = new Intent(MainActivity.this, AddActivity.class);
                 startActivity(intent);
             }
         });
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, products);
-        listViewProducts.setAdapter(adapter);
 
+        myDB = new MyDatabaseHelper(MainActivity.this);
+        product_id = new ArrayList<>();
+        product_name = new ArrayList<>();
+        product_desc = new ArrayList<>();
+        product_price = new ArrayList<>();
+        product_location = new ArrayList<>();
 
-        listViewProducts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Product product = products.get(position);
-                Intent intent = new Intent(MainActivity.this, UpdateProductActivity.class);
-                intent.putExtra("product", (CharSequence) product);
-                startActivity(intent);
-            }
-        });
-        //getProduct();
+        storeDataInArrays();
+
+        customAdapter = new CustomAdapter(MainActivity.this,this, product_id, product_name, product_desc,
+                product_price,product_location);
+        recyclerView.setAdapter(customAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
     }
-
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        loadProducts();
-    }
-
-    private void loadProducts() {
-        products = productDAO.getAllProducts();
-        adapter.clear();
-        adapter.addAll(products);
-        adapter.notifyDataSetChanged();
-    }
-
-    
-        public void onProductAdded(Product product) {
-            productDAO.insertProduct(product);
-            loadProducts();
-            listViewProducts.setVisibility(View.VISIBLE);
-
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 1){
+            recreate();
         }
     }
 
+    void storeDataInArrays(){
+        Cursor cursor = myDB.readAllData();
+        if(cursor.getCount() == 0){
+            empty_imageview.setVisibility(View.VISIBLE);
+            no_data.setVisibility(View.VISIBLE);
+        }else{
+            while (cursor.moveToNext()){
+                product_id.add(cursor.getString(0));
+                product_name.add(cursor.getString(1));
+                product_desc.add(cursor.getString(2));
+                product_price.add(cursor.getString(3));
+                product_location.add(cursor.getString(3));
+            }
+            empty_imageview.setVisibility(View.GONE);
+            no_data.setVisibility(View.GONE);
+        }
+    }
 
-//    private void getProduct() {
-//        class GetProduct extends AsyncTask<Void, Void, List<Product>> {
-//
-//            @Override
-//            protected List<Product> doInBackground(Void... voids) {
-//                List<Product> productList = DatabaseClient
-//                        .getInstance(getApplicationContext())
-//                        .getAppDatabase()
-//                        .productDao()
-//                        .getAllProducts();
-//                return productList;
-//            }
-//
-//            @Override
-//            protected void onPostExecute(List<Product> products) {
-//                super.onPostExecute(products);
-//                ProductAdapter adapter = new ProductAdapter(MainActivity.this, products);
-//                recyclerView.setAdapter(adapter);
-//
-//            }
-//        }
-//
-//        GetProduct gt = new GetProduct();
-//        gt.execute();
-//    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.delete_all){
+            confirmDialog();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    void confirmDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Delete All?");
+        builder.setMessage("Are you sure you want to delete all Data?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                MyDatabaseHelper myDB = new MyDatabaseHelper(MainActivity.this);
+                myDB.deleteAllData();
+                //Refresh Activity
+                Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        builder.create().show();
+    }
+}
+
 
